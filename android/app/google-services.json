@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "926856531081",
+    "project_id": "practicaldemomidnight",
+    "storage_bucket": "practicaldemomidnight.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926856531081:android:96e5dedcb11506bc10ca58",
+        "android_client_info": {
+          "package_name": "com.practical.demo.midnight_interview_practical"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgCyfta8-f_So7HXk7Xp4riwHuUwi5DMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
