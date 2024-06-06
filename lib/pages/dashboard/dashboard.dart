@@ -84,7 +84,7 @@ class _DashboardState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         leading: new Padding(
-          padding: const EdgeInsets.all(0),
+          padding: const EdgeInsets.only(left: 10),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
             child: Image.network(
@@ -99,6 +99,7 @@ class _DashboardState extends State<DashboardPage> {
           Icon(Icons.notifications),
           SizedBox(width: 10),
           Icon(Icons.menu),
+          SizedBox(width: 10),
         ],
       ),
       body: SingleChildScrollView(

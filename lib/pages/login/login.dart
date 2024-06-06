@@ -257,10 +257,14 @@ class _LoginPageState extends State<LoginPage> {
             context: context)
         .request(onSuccess: (data, response) {
       LoginResponse loginResponse = LoginResponse.fromJson(response);
-      print("status ${loginResponse.status}");
+      //print("status ${loginResponse.status}");
       if (loginResponse.status == 200) {
         AppHelpers.showShortToast(loginResponse.message!);
-        Get.off(() => const DashboardPage());
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => DashboardPage()),
+                (route) => false
+        );
       } else {
         AppHelpers.showLongToast(loginResponse.message!);
       }

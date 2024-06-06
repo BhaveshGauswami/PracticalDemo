@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      debugShowCheckedModeBanner: false,
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -53,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
       (Timer timer) {
         if (_start == 0) {
           timer.cancel();
-          Get.off(() => const DashboardPage(), preventDuplicates: false);
+          Get.off(() => const LoginPage(), preventDuplicates: false);
         } else {
           _start--;
         }
