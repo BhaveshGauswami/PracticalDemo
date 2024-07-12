@@ -12,15 +12,18 @@ class ApiRequest {
   var response;
   bool withLoading;
   var context;
+  String stToken;
 
   ApiRequest(
       {required this.path,
       this.data,
       required this.methoud,
       this.withLoading = true,
-      required this.context});
+      required this.context,
+      this.stToken=""});
 
   Dio _dio() {
+    print("token $stToken");
     // Put your authorization token here
     return Dio(
       BaseOptions(
@@ -28,6 +31,7 @@ class ApiRequest {
           /* 'Authorization': _myAppController.userData != null
               ? 'Bearer ${_myAppController.userData['token']}'
               : '',*/
+          'Authorization':stToken,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },

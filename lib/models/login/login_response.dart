@@ -1,6 +1,6 @@
 class LoginResponse {
   int? status;
-  Null? count;
+  String? count;
   List<Data>? data;
   String? message;
 
@@ -61,9 +61,9 @@ class Data {
   String? userreligion;
   String? usergender;
   String? userprofilephoto;
-  Null? userdateofjoining;
-  Null? userPFcode;
-  Null? userESIcode;
+  String? userdateofjoining;
+  String? userPFcode;
+  String? userESIcode;
   String? userheight;
   String? userweight;
   int? userBloodTypeId;
@@ -82,26 +82,26 @@ class Data {
   int? isResigned;
   int? isProbation;
   int? noticePeriod;
-  Null? noticePeriodEndDate;
+  String? noticePeriodEndDate;
   int? isExit;
   String? nationality;
   int? checkinallowanywhere;
   int? reportCompulsory;
   int? isReportChecker;
   int? status;
-  Null? browserName;
-  Null? browserPlatform;
-  Null? browserVersion;
-  Null? ipAddress;
+  String? browserName;
+  String? browserPlatform;
+  String? browserVersion;
+  String? ipAddress;
   String? createdAt;
   String? updatedAt;
   String? createdBy;
-  Null? updatedBy;
+  String? updatedBy;
   String? token;
   String? deviceId;
   String? deviceModel;
   String? osVersion;
-  Null? mobilePlateform;
+  String? mobilePlateform;
   String? permanentpincode;
   String? permanentcountry;
   String? permanentdistrict;
@@ -118,7 +118,7 @@ class Data {
   String? organizationHrPolicy;
   String? organizationNda;
   String? dateOfJoining;
-  Null? officialDateOfJoing;
+  String? officialDateOfJoing;
   String? userrole;
   int? isWorkMenuEnable;
   int? distance;

@@ -9,6 +9,7 @@ class AppConstants {
 
   ///List of endpoint strings
   static const String stLoginEndpoint = "login";
+  static const String stGetAllAttendanceHistoryEndpoint = "getallattendancehistory";
 
   ///List of assets images
   static const String stLoginBackgroundImagePath =

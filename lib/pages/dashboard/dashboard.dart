@@ -1,83 +1,52 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import '../../controllers/dashboard/dashboardcontroller.dart';
+import '../../models/dashboard/all_attendance_history_model.dart';
+import '../../services/ApiRequest.dart';
 import '../../utils/calendar/data/children_item_datasets.dart';
 import '../../utils/calendar/data/heatmap_datasets.dart';
 import '../../utils/calendar/enums/heatmap_color_mode.dart';
 import '../../utils/calendar/enums/heatmap_type.dart';
 import '../../utils/calendar/heatmap_calendar.dart';
 import '../../utils/constants.dart';
+import '../../utils/helpers.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+  final String stUserImagePath;
+  final String stUserName;
+  final String stLoginToken;
+  final int stUserId;
+
+  const DashboardPage({Key? key,
+    required this.stUserImagePath,
+    required this.stUserName,
+    required this.stLoginToken,
+    required this.stUserId})
+      : super(key: key);
 
   @override
   State<DashboardPage> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<DashboardPage> {
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController heatLevelController =
-      TextEditingController(text: "1");
+  final DashboardController _DashboardController =
+  Get.put(DashboardController());
 
-  bool isOpacityMode = true;
-  bool isWidgetMode = true;
-
-  Map<DateTime, HeatmapData> heatMapDatasets = {
-    DateTime(2024, 04, 01): HeatmapData(intensity: 1, heatMapChildren: [
-      HeatmapChildrenData(
-          label: "label1",
-          desc: "desc1",
-          child: const Icon(
-            Icons.fire_extinguisher,
-            size: 20,
-            color: Colors.amber,
-          )),
-    ]),
-    DateTime(2024, 04, 05): HeatmapData(intensity: 1, heatMapChildren: [
-      HeatmapChildrenData(
-          label: "label1",
-          desc: "desc1",
-          child: const Icon(
-            Icons.fire_extinguisher,
-            size: 20,
-            color: Colors.amber,
-          )),
-      HeatmapChildrenData(
-          label: "label2",
-          desc: "desc2",
-          child: const Icon(
-            Icons.water,
-            size: 20,
-            color: Colors.deepPurple,
-          )),
-    ]),
-    DateTime(2024, 04, 12): HeatmapData(intensity: 1, heatMapChildren: [
-      HeatmapChildrenData(
-          label: "label1",
-          desc: "desc1",
-          child: const Icon(
-            Icons.fire_extinguisher,
-            size: 20,
-            color: Colors.amber,
-          )),
-      HeatmapChildrenData(
-          label: "label2",
-          desc: "desc2",
-          child: const Icon(
-            Icons.water,
-            size: 20,
-            color: Colors.deepPurple,
-          )),
-      HeatmapChildrenData(
-          label: "label3",
-          desc: "desc3",
-          child: const Icon(
-            Icons.flood,
-            size: 20,
-            color: Colors.blue,
-          )),
-    ]),
-  };
+  @override
+  void initState() {
+    super.initState();
+    String stYear = DateFormat('yyyy').format(DateTime.now());
+    String stMonth = DateFormat('MM').format(DateTime.now());
+    print("stYear $stYear and stMonth $stMonth");
+    final allAttendanceHistoryParams = <String, dynamic>{};
+    allAttendanceHistoryParams['user_id'] = widget.stUserId;
+    allAttendanceHistoryParams['year'] = int.parse(stYear);
+    allAttendanceHistoryParams['month'] = int.parse(stMonth);
+    _DashboardController.callGetAllAttendanceHistoryAPI(
+        context, allAttendanceHistoryParams, widget.stLoginToken);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,16 +54,22 @@ class _DashboardState extends State<DashboardPage> {
       appBar: AppBar(
         leading: new Padding(
           padding: const EdgeInsets.only(left: 10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(
-              'https://img.freepik.com/free-photo/gray-abstract-wireframe-technology-background_53876-101941.jpg?w=740&t=st=1717608925~exp=1717609525~hmac=faec03a059d03d94f5eb5cfe849ee24f306ab19cb1b33741e49ce37e5f7b5b7e',
-              height: 50.0,
-              width: 50.0,
+          child: Card(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Container(
+              height: 50,
+              width: 60,
+              decoration: BoxDecoration(),
+              child: FittedBox(
+                child: Image.network(widget.stUserImagePath),
+                fit: BoxFit.fill,
+              ),
             ),
-          )
+          ),
         ),
-        title: Text(AppConstants.stDashboard),
+        title: Text(widget.stUserName),
         actions: [
           Icon(Icons.notifications),
           SizedBox(width: 10),
@@ -106,29 +81,67 @@ class _DashboardState extends State<DashboardPage> {
         child: Column(
           children: [
             _buildCalendarWithValue(),
-            Row(
-              children: [
-                Flexible(flex: 1, child: Text("data")),
-                Flexible(
-                    flex: 9,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text("Present"),
-                            ),
-                            Expanded(
-                              child: Text("-------"),
-                            ),
-                            Expanded(
-                              child: Container(),
-                            ),
-                          ],
+            SizedBox(height: 10),
+            Text("Paid"),
+            SizedBox(height: 10),
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: _DashboardController.leaveList.length,
+              itemBuilder: (context, position) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 15,right: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_DashboardController.leaveList[position]),
+                      Container(
+                        height: 25,
+                        width: 25,
+                        color: Colors.green,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("1",
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 12)),
                         ),
-                      ],
-                    )),
-              ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 10),
+            Text("Unpaid"),
+            SizedBox(height: 10),
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: _DashboardController.unpaidLeaveList.length,
+              itemBuilder: (context, position) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 15,right: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_DashboardController.unpaidLeaveList[position]),
+                      Container(
+                        height: 25,
+                        width: 25,
+                        color: Colors.green,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("1",
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -145,28 +158,32 @@ class _DashboardState extends State<DashboardPage> {
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: HeatMapCalendar(
-              flexible: true,
-              datasets: heatMapDatasets,
-              heatmapType: isWidgetMode
-                  ? HeatmapCalendarType.widgets
-                  : HeatmapCalendarType.intensity,
-              colorMode: isOpacityMode ? ColorMode.opacity : ColorMode.color,
-              colorsets: const {
-                1: Colors.red,
-                3: Colors.orange,
-                5: Colors.yellow,
-                7: Colors.green,
-                9: Colors.blue,
-                11: Colors.indigo,
-                13: Colors.purple,
-              },
-              defaultColor: Colors.white,
-              onClick: (datetime, heatmapData) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$datetime : $heatmapData')));
-              },
-            ),
+            child: Obx(() =>
+                Visibility(
+                  visible: _DashboardController.isShowCalendar.value == true,
+                  child: HeatMapCalendar(
+                    flexible: true,
+                    datasets: _DashboardController.heatMapDatasets,
+                    heatmapType: HeatmapCalendarType.intensity,
+                    colorMode: ColorMode.color,
+                    textColor: Colors.white,
+                    onMonthChange: (datetime) {},
+                    colorsets: const {
+                      1: Colors.red,
+                      3: Colors.orange,
+                      5: Colors.yellow,
+                      7: Colors.green,
+                      9: Colors.blue,
+                      11: Colors.indigo,
+                      13: Colors.purple,
+                    },
+                    defaultColor: Colors.green,
+                    onClick: (datetime, heatmapData) {
+                      /*ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('$datetime : $heatmapData')));*/
+                    },
+                  ),
+                )),
           ),
         ),
       ],
@@ -176,7 +193,7 @@ class _DashboardState extends State<DashboardPage> {
   @override
   void dispose() {
     super.dispose();
-    dateController.dispose();
-    heatLevelController.dispose();
+    //dateController.dispose();
+    _DashboardController.heatLevelController.dispose();
   }
 }

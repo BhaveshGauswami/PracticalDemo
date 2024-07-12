@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:midnight_interview_practical/models/login/login_response.dart';
 import 'package:midnight_interview_practical/pages/dashboard/dashboard.dart';
@@ -26,15 +27,15 @@ class _LoginPageState extends State<LoginPage> {
   final LoginController _LoginController = Get.put(LoginController());
   final _loginFormKey = GlobalKey<FormState>();
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
 
   @override
   void initState() {
     super.initState();
-    _LoginController.usernameController.text = "BCON001";
-    _LoginController.passwordController.text = "1234";
     initFCMToken();
     initPlatformState();
     initUniqueIdentifierState();
+    _getCurrentPosition();
   }
 
   @override
@@ -224,15 +225,6 @@ class _LoginPageState extends State<LoginPage> {
                                       _LoginController.stOsVersion;
                                   loginParams['mobile_platform'] =
                                       _LoginController.stMobilePlatform;
-                                  /*var loginParams = ({
-                                    "employee_id": _LoginController.usernameController.text.trim().toString(),
-                                    "userpassword": _LoginController.passwordController.text.trim().toString(),
-                                    "fcmToken": "LAD000404LAD000404LAD000404LAD000404",
-                                    "deviceId": _LoginController.stDeviceId,
-                                    "deviceModel": _LoginController.stDeviceModel,
-                                    "osVersion": _LoginController.stOsVersion,
-                                    "mobile_platform": _LoginController.stMobilePlatform
-                                  });*/
                                   callLoginAPI(loginParams);
                                 }
                               },
@@ -249,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void callLoginAPI(var params) {
+  callLoginAPI(var params) {
     ApiRequest(
             path: AppConstants.stLoginEndpoint,
             data: params,
@@ -262,9 +254,13 @@ class _LoginPageState extends State<LoginPage> {
         AppHelpers.showShortToast(loginResponse.message!);
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-                builder: (context) => DashboardPage()),
-                (route) => false
-        );
+                builder: (context) => DashboardPage(
+                      stUserImagePath: loginResponse.data![0].userprofilephoto!,
+                      stUserName: loginResponse.data![0].userfirstname!,
+                      stLoginToken: loginResponse.data![0].token!,
+                      stUserId: loginResponse.data![0].userId!,
+                    )),
+            (route) => false);
       } else {
         AppHelpers.showLongToast(loginResponse.message!);
       }
@@ -276,8 +272,55 @@ class _LoginPageState extends State<LoginPage> {
 
   initFCMToken() {
     FirebaseMessaging.instance.getToken().then((value) {
-      _LoginController.stFCMToken=value;
+      _LoginController.stFCMToken = value;
       print("FirebaseMessaging token is $value");
     });
+  }
+
+  Future<void> _getCurrentPosition() async {
+    final hasPermission = await _handlePermission();
+
+    if (!hasPermission) {
+      return;
+    }
+
+    final position = await _geolocatorPlatform.getCurrentPosition();
+    print("latitude ${position.latitude}");
+    print("longitude ${position.longitude}");
+  }
+
+  Future<bool> _handlePermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await _geolocatorPlatform.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+
+      return false;
+    }
+
+    permission = await _geolocatorPlatform.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await _geolocatorPlatform.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return false;
+    }
+    return true;
   }
 }
